@@ -4,7 +4,7 @@
   <title>Camera Map Editor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    #map { height: 100vh; width: 75%; float: left; }
+    #map { height: 100vh; width: 72%; float: left; }
     #sidebar { width: 25%; float: right; padding: 10px; background: #f8f8f8; height: 100vh; overflow-y: auto; }
     label { display: block; margin-top: 10px; }
     input { width: 100%; margin-bottom: 10px; }
@@ -23,6 +23,7 @@
   <label>Height (feet) <input id="height" type="number" step="1" value="10"></label>
   <label>Tilt (0-90) <input id="tilt" type="number" step="1"></label>
   <button onclick="updateCamera()">Update Camera</button>
+  <button>Export Data!</button>
 </div>
 
 <script>
