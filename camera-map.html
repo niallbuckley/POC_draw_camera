@@ -27,14 +27,14 @@
 </div>
 
 <script>
-let map, cameraMarker, fovShape;
+let map, cameraMarker, fovShape, azimuthControl;
 let cameraData = {
   lat: 51.700109,
   lng: -8.499654,
   azimuth: 250,
   fov: 60,
   height: 10,
-  tilt: 90
+  tilt: 0
 };
 
 function initMap() {
@@ -60,6 +60,29 @@ function initMap() {
     drawFOV();
   });
 
+  azimuthControl = new google.maps.Marker({
+    position: computeAzimuthPoint(),
+    map: map,
+    draggable: true,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 6,
+      fillColor: 'blue',
+      fillOpacity: 1,
+      strokeWeight: 1,
+      strokeColor: 'white'
+    },
+    title: 'Adjust Azimuth'
+  });
+
+  azimuthControl.addListener('drag', () => {
+    const center = cameraMarker.getPosition();
+    const tip = azimuthControl.getPosition();
+    cameraData.azimuth = computeHeading(center, tip);
+    document.getElementById('azimuth').value = ((cameraData.azimuth + 360) % 360).toFixed(0);;
+    drawFOV();
+  });
+
   document.getElementById('lat').value = cameraData.lat;
   document.getElementById('lng').value = cameraData.lng;
   document.getElementById('azimuth').value = cameraData.azimuth;
@@ -70,11 +93,17 @@ function initMap() {
   drawFOV();
 }
 
+// Function redraws the Field of View for camera (the triangle)
 function drawFOV() {
   if (fovShape) fovShape.setMap(null);
 
   const center = new google.maps.LatLng(cameraData.lat, cameraData.lng);
-  const radius = 30; // meters
+  const maxRadius = 30;
+  const heightMeters = (cameraData.height * 0.3048)+1; // convert height to meters
+  const tiltRadians = (cameraData.tilt * Math.PI) / 180;
+
+  let radius = heightMeters / Math.tan(tiltRadians);
+  radius = Math.min(radius, maxRadius);
   
   const points = [];
   const startAngle = (cameraData.azimuth - cameraData.fov / 2) % 360;
@@ -97,6 +126,18 @@ function drawFOV() {
     fillOpacity: 0.35,
     map: map
   });
+
+  // Update azimuth control point position
+  azimuthControl.setPosition(computeAzimuthPoint(radius));
+}
+
+function computeAzimuthPoint(radius) {
+  const center = new google.maps.LatLng(cameraData.lat, cameraData.lng);
+  return google.maps.geometry.spherical.computeOffset(center, radius, cameraData.azimuth);
+}
+
+function computeHeading(fromLatLng, toLatLng) {
+  return google.maps.geometry.spherical.computeHeading(fromLatLng, toLatLng);
 }
 
 function updateCamera() {
@@ -114,7 +155,4 @@ function updateCamera() {
 
 window.initMap = initMap();
 </script>
-
-</body>
-</html>
 
