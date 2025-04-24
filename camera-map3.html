@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Camera Map Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    #map { height: 100vh; width: 72%; float: left; }
+    #sidebar { width: 25%; float: right; padding: 10px; background: #f8f8f8; height: 100vh; overflow-y: auto; }
+    label { display: block; margin-top: 10px; }
+    input { width: 100%; margin-bottom: 10px; }
+  </style>
+  <script src="https://maps.googleapis.com/maps/api/js?key=<PRIVATE>&libraries=geometry"></script>
+</head>
+<body>
+
+<div id="map"></div>
+<div id="sidebar">
+  <h2>Camera Settings</h2>
+  <label>Latitude <input id="lat" type="number" step="0.000001"></label>
+  <label>Longitude <input id="lng" type="number" step="0.000001"></label>
+  <label>Azimuth (0-360) <input id="azimuth" type="number" step="1"></label>
+  <label>Field of View (0-360) <input id="fov" type="number" step="1"></label>
+  <label>Height (feet) <input id="height" type="number" step="1" value="10"></label>
+  <label>Tilt (0-90) <input id="tilt" type="number" step="1"></label>
+  <button onclick="updateCamera()">Update Camera</button>
+  <button>Export Data!</button>
+</div>
+
+<script>
+let map, cameraMarker, fovShape, azimuthControl;
+const fixedRadius = 15; // meters - fixed radius for azimuth control
+
+let cameraData = {
+  lat: 51.700109,
+  lng: -8.499654,
+  azimuth: 250,
+  fov: 60,
+  height: 10,
+  tilt: 0
+};
+
+function initMap() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: { lat: cameraData.lat, lng: cameraData.lng },
+    zoom: 18,
+    mapTypeId: 'satellite'
+  });
+
+  cameraMarker = new google.maps.Marker({
+    position: { lat: cameraData.lat, lng: cameraData.lng },
+    map: map,
+    draggable: true,
+    title: 'Camera Location'
+  });
+
+  cameraMarker.addListener('dragend', () => {
+    let pos = cameraMarker.getPosition();
+    cameraData.lat = pos.lat();
+    cameraData.lng = pos.lng();
+    document.getElementById('lat').value = cameraData.lat.toFixed(6);
+    document.getElementById('lng').value = cameraData.lng.toFixed(6);
+    drawFOV();
+  });
+
+  azimuthControl = new google.maps.Marker({
+    position: computeAzimuthPoint(),
+    map: map,
+    draggable: true,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 6,
+      fillColor: 'blue',
+      fillOpacity: 1,
+      strokeWeight: 1,
+      strokeColor: 'white'
+    },
+    title: 'Adjust Azimuth'
+  });
+
+  azimuthControl.addListener('drag', () => {
+    lockAzimuthControlToCircle();
+  });
+
+  azimuthControl.addListener('dragend', () => {
+    lockAzimuthControlToCircle();
+  });
+
+  document.getElementById('lat').value = cameraData.lat;
+  document.getElementById('lng').value = cameraData.lng;
+  document.getElementById('azimuth').value = cameraData.azimuth;
+  document.getElementById('fov').value = cameraData.fov;
+  document.getElementById('height').value = cameraData.height;
+  document.getElementById('tilt').value = cameraData.tilt;
+
+  drawFOV();
+}
+
+function drawFOV() {
+  if (fovShape) fovShape.setMap(null);
+
+  const center = new google.maps.LatLng(cameraData.lat, cameraData.lng);
+  const maxRadius = 30;
+  const heightMeters = (cameraData.height * 0.3048) + 1;
+  const tiltRadians = (cameraData.tilt * Math.PI) / 180;
+
+  let radius = heightMeters / Math.tan(tiltRadians || 0.0001); // avoid divide-by-zero
+  radius = Math.min(radius, maxRadius);
+
+  const points = [];
+  const startAngle = (cameraData.azimuth - cameraData.fov / 2 + 360) % 360;
+  const endAngle = (cameraData.azimuth + cameraData.fov / 2 + 360) % 360;
+
+  points.push(center);
+
+  let angle = startAngle
+  while (true){
+    const point = google.maps.geometry.spherical.computeOffset(center, radius, angle);
+    points.push(point);
+    if (angle === endAngle) break;
+    angle = (angle + 1) % 360;
+    if (startAngle > endAngle && angle === (endAngle + 1) % 360) break; // wraparound case
+  }
+  // for (let angle = startAngle; angle <= endAngle; angle += 1) {
+  //   const heading = angle % 360;
+  //   const point = google.maps.geometry.spherical.computeOffset(center, radius, heading);
+  //   points.push(point);
+  // }
+
+  fovShape = new google.maps.Polygon({
+    paths: points,
+    strokeColor: '#FF0000',
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+    fillColor: '#FF0000',
+    fillOpacity: 0.35,
+    map: map
+  });
+
+  // Keep azimuth control in place
+  azimuthControl.setPosition(computeAzimuthPoint());
+}
+
+function computeAzimuthPoint(radius = fixedRadius) {
+  const center = new google.maps.LatLng(cameraData.lat, cameraData.lng);
+  return google.maps.geometry.spherical.computeOffset(center, radius, cameraData.azimuth);
+}
+
+function computeHeading(fromLatLng, toLatLng) {
+  return google.maps.geometry.spherical.computeHeading(fromLatLng, toLatLng);
+}
+
+function lockAzimuthControlToCircle() {
+  const center = cameraMarker.getPosition();
+  const current = azimuthControl.getPosition();
+  const heading = computeHeading(center, current);
+  cameraData.azimuth = (heading + 360) % 360;
+
+  const correctedPosition = google.maps.geometry.spherical.computeOffset(center, fixedRadius, cameraData.azimuth);
+  azimuthControl.setPosition(correctedPosition);
+
+  document.getElementById('azimuth').value = cameraData.azimuth.toFixed(0);
+  drawFOV();
+}
+
+function updateCamera() {
+  cameraData.lat = parseFloat(document.getElementById('lat').value);
+  cameraData.lng = parseFloat(document.getElementById('lng').value);
+  cameraData.azimuth = parseFloat(document.getElementById('azimuth').value);
+  cameraData.fov = parseFloat(document.getElementById('fov').value);
+  cameraData.height = parseFloat(document.getElementById('height').value);
+  cameraData.tilt = parseFloat(document.getElementById('tilt').value);
+
+  cameraMarker.setPosition({ lat: cameraData.lat, lng: cameraData.lng });
+  map.panTo({ lat: cameraData.lat, lng: cameraData.lng });
+  drawFOV();
+}
+
+window.initMap = initMap();
+</script>
+
+</body>
+</html>
+
