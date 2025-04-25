@@ -1,4 +1,4 @@
-# POC_draw_camera
+# Proof of concept: accurately define geo-location and view coordinates for a camera and export to csv
 
 
 ## Set UP
