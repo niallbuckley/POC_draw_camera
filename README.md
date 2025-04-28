@@ -3,7 +3,7 @@
 
 ## Set UP
 Run the HTML in a page which does not have web secuirty (CORS will typically block this request)\
-`google-chrome --disable-web-security --user-data-dir=~/Desktop/test/`\
+`google-chrome --disable-web-security --user-data-dir=~/Desktop/test/`
 
 You can write to the sheet referenced in the code if you want, or else edit your own sheet
 
