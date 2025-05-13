@@ -1,6 +1,6 @@
 function doPost(e) {
   // Add sheet name here
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1");
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("camera_map_data");
   const data = JSON.parse(e.postData.contents);
   
   sheet.appendRow([
