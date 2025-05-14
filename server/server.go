@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
-	// "io"
 	"encoding/json"
 	"net/http"
 
@@ -14,7 +12,7 @@ import (
 
 
 func basicGetRequest(c echo.Context) error {
-     return c.JSON(http.StatusOK, map[string]string{"message": "Hello from Go Echo!",})
+     return c.JSON(http.StatusOK, map[string]string{"apiKey": "<PRIVATE>",})
 }
 
 type sheetData struct {
@@ -32,7 +30,6 @@ func uploadSheetData(c echo.Context) error {
 	if err := c.Bind(&data); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
 	}
-	fmt.Printf("%+v", data)
 
 	// Marshal struct to JSON
 	sheetDataJson, err := json.Marshal(data)
@@ -60,7 +57,7 @@ func main() {
 	e.Use(middleware.CORS())
 
 
-	e.GET("/api/hello", basicGetRequest)
+	e.GET("/api/map-key", basicGetRequest)
 	e.POST("/api/sheetData", uploadSheetData)
 
 	e.Logger.Fatal(e.Start(":8080"))
