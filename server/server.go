@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	// "io"
+	"encoding/json"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -29,10 +31,26 @@ func uploadSheetData(c echo.Context) error {
 
 	if err := c.Bind(&data); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	 }
-	 fmt.Printf("%+v", data)
+	}
+	fmt.Printf("%+v", data)
 
-	 return nil
+	// Marshal struct to JSON
+	sheetDataJson, err := json.Marshal(data)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to marshal JSON"})
+	}
+	
+	resp, err := http.Post(
+		"https://script.google.com/macros/s/AKfycbzQ3QVWlcUGYl-pSN9Fct4SCLg7yvtNyak372qxCR84ZQnV7vUsSgDx4A6T6944TPuL/exec", 
+		"application/json", 
+		bytes.NewBuffer(sheetDataJson),
+	)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to send data to Google Sheets"})
+	}
+	defer resp.Body.Close()
+
+	return c.JSON(http.StatusOK, map[string]string{"status": "Data sent to Google Sheets"})
 }
 
 func main() {
