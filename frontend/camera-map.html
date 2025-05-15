@@ -171,11 +171,13 @@ function exportToSheet() {
   .catch(err => alert('Export failed: ' + err));
 }
 
-function loadMapScript() {
+async function loadMapScript() {
     console.log("load map..");
+    const res = await fetch("http://localhost:8080/api/map-key")
+    const { apiKey } = await res.json()
     const script = document.createElement('script');
-    console.log("huh");
-    script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDhXjC9E2hoQgxeC63V5KFBStvVuJrv8NY&libraries=geometry";
+    console.log("huh: ", apiKey);
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
     script.async = true;
     script.defer = true;
     script.onload = () => {
