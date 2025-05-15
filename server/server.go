@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"os"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -11,8 +12,9 @@ import (
 
 
 
-func basicGetRequest(c echo.Context) error {
-     return c.JSON(http.StatusOK, map[string]string{"apiKey": "<PRIVATE>",})
+func getApiKey(c echo.Context) error {
+     val := os.Getenv("GOOGLE_MAPS_API")
+     return c.JSON(http.StatusOK, map[string]string{"apiKey": val,})
 }
 
 type sheetData struct {
@@ -57,7 +59,7 @@ func main() {
 	e.Use(middleware.CORS())
 
 
-	e.GET("/api/map-key", basicGetRequest)
+	e.GET("/api/map-key", getApiKey)
 	e.POST("/api/sheetData", uploadSheetData)
 
 	e.Logger.Fatal(e.Start(":8080"))
