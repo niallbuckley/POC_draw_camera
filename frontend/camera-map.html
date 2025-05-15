@@ -9,9 +9,6 @@
     label { display: block; margin-top: 10px; }
     input { width: 100%; margin-bottom: 10px; }
   </style>
-  <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhXjC9E2hoQgxeC63V5KFBStvVuJrv8NY&libraries=geometry"></script> -->
-  <!-- <script>
-  </script> -->
 </head>
 <body>
 
@@ -157,7 +154,6 @@ function updateCamera() {
 }
 
 function exportToSheet() {
-  // Add your script URL here
   cameraData.azimuth = ((cameraData.azimuth+360)%360).toFixed(0)
   fetch('http://localhost:8080/api/sheetData', {
     method: 'POST',
@@ -172,16 +168,13 @@ function exportToSheet() {
 }
 
 async function loadMapScript() {
-    console.log("load map..");
     const res = await fetch("http://localhost:8080/api/map-key")
     const { apiKey } = await res.json()
     const script = document.createElement('script');
-    console.log("huh: ", apiKey);
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      console.log("Loaded....")
       window.initMap = initMap();
     }
     document.head.appendChild(script);
