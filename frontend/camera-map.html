@@ -9,18 +9,8 @@
     label { display: block; margin-top: 10px; }
     input { width: 100%; margin-bottom: 10px; }
   </style>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhXjC9E2hoQgxeC63V5KFBStvVuJrv8NY&libraries=geometry"></script>
+  <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhXjC9E2hoQgxeC63V5KFBStvVuJrv8NY&libraries=geometry"></script> -->
   <!-- <script>
-    function loadMapScript() {
-      console.log("load map..");
-      const script = document.createElement('script');
-      console.log("huh");
-      script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDhXjC9E2hoQgxeC63V5KFBStvVuJrv8NY&libraries=geometry";
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    }
-    loadMapScript();
   </script> -->
 </head>
 <body>
@@ -169,7 +159,7 @@ function updateCamera() {
 function exportToSheet() {
   // Add your script URL here
   cameraData.azimuth = ((cameraData.azimuth+360)%360).toFixed(0)
-  fetch('https://script.google.com/macros/s/AKfycbzQ3QVWlcUGYl-pSN9Fct4SCLg7yvtNyak372qxCR84ZQnV7vUsSgDx4A6T6944TPuL/exec', {
+  fetch('http://localhost:8080/api/sheetData', {
     method: 'POST',
     body: JSON.stringify(cameraData),
     headers: {
@@ -181,6 +171,19 @@ function exportToSheet() {
   .catch(err => alert('Export failed: ' + err));
 }
 
-window.initMap = initMap();
+function loadMapScript() {
+    console.log("load map..");
+    const script = document.createElement('script');
+    console.log("huh");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDhXjC9E2hoQgxeC63V5KFBStvVuJrv8NY&libraries=geometry";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      console.log("Loaded....")
+      window.initMap = initMap();
+    }
+    document.head.appendChild(script);
+}
+loadMapScript();
 </script>
 
