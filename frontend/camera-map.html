@@ -168,7 +168,7 @@ function exportToSheet() {
 }
 
 async function loadMapScript() {
-    const res = await fetch("http://localhost:8080/api/map-key")
+    const res = await fetch("http://localhost:8080/api/mapKey")
     const { apiKey } = await res.json()
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;

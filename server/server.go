@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"strings"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -40,6 +41,7 @@ func uploadSheetData(c echo.Context) error {
 	}
 	
 	resp, err := http.Post(
+		// could get the id of the google sheet from user or env var as well
 		"https://script.google.com/macros/s/AKfycbzQ3QVWlcUGYl-pSN9Fct4SCLg7yvtNyak372qxCR84ZQnV7vUsSgDx4A6T6944TPuL/exec", 
 		"application/json", 
 		bytes.NewBuffer(sheetDataJson),
@@ -54,13 +56,23 @@ func uploadSheetData(c echo.Context) error {
 
 func main() {
 	e := echo.New()
+	e.Static("/", "../frontend")
 
 	// Enable CORS for all origins (for local dev)
 	e.Use(middleware.CORS())
 
+    e.GET("/*", func(c echo.Context) error {
+	 if !strings.HasPrefix(c.Path(), "/api") {
+	   return c.File("../frontend/camera-map.html")
+      } else {
+		return nil
+	  }
+	})
 
-	e.GET("/api/map-key", getApiKey)
+	// APIs
+	e.GET("/api/mapKey", getApiKey)
 	e.POST("/api/sheetData", uploadSheetData)
 
+	// Start server on port 8080
 	e.Logger.Fatal(e.Start(":8080"))
 }
