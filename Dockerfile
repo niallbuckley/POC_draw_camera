@@ -23,4 +23,3 @@ USER nonroot:nonroot
 
 EXPOSE 8080
 ENTRYPOINT ["/app"]
-
