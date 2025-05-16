@@ -1,8 +1,7 @@
 # Proof of concept: accurately define geo-location and view coordinates for a camera and export to csv
 
 ## Set up - Simple
-Run command  
-`make app`
+Run command:  `make app`
 
 ## Set up - Complex
 Run the HTML in a page which does not have web secuirty (CORS will typically block this request)\
