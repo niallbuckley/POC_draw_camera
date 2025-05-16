@@ -4,9 +4,9 @@
 Run command:  `make app` \
 Go to your browser and go to `localhost:8080/`
 
-## Set up - Complex
-Run the HTML in a page which does not have web secuirty (CORS will typically block this request)\
-`google-chrome --disable-web-security --user-data-dir=~/Desktop/test/`
+## If you want to edit your own sheet
+~~ Run the HTML in a page which does not have web secuirty (CORS will typically block this request)\
+`google-chrome --disable-web-security --user-data-dir=~/Desktop/test/` ~~
 
 You can write to the sheet referenced in the code if you want, or else edit your own sheet
 
