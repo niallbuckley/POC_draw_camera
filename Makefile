@@ -1,13 +1,12 @@
 APP_NAME=camermap-server
 PORT=8080
 
-.PHONY: docker-build app example
+.PHONY: docker-build app
 
 docker-build:
-	docker build -t $(APP_NAME) .	
+	docker build -t $(APP_NAME) .
 
-
-app:
+app:    docker-build
 	@echo "Running Server.."
 	@if [ -z "$$GOOGLE_MAPS_API" ]; then \
 		read -p "Enter your Google maps api key: " key; \
