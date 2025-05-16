@@ -1,7 +1,10 @@
 # Proof of concept: accurately define geo-location and view coordinates for a camera and export to csv
 
+## Set up - Simple
+Run command \
+`make app`
 
-## Set UP
+## Set up - Complex
 Run the HTML in a page which does not have web secuirty (CORS will typically block this request)\
 `google-chrome --disable-web-security --user-data-dir=~/Desktop/test/`
 
