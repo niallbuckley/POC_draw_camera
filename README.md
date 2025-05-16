@@ -1,7 +1,7 @@
 # Proof of concept: accurately define geo-location and view coordinates for a camera and export to csv
 
 ## Set up - Simple
-Run command \
+Run command  
 `make app`
 
 ## Set up - Complex
