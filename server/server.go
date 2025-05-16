@@ -41,6 +41,7 @@ func uploadSheetData(c echo.Context) error {
 	}
 	
 	resp, err := http.Post(
+		// could get the id of the google sheet from user or env var as well
 		"https://script.google.com/macros/s/AKfycbzQ3QVWlcUGYl-pSN9Fct4SCLg7yvtNyak372qxCR84ZQnV7vUsSgDx4A6T6944TPuL/exec", 
 		"application/json", 
 		bytes.NewBuffer(sheetDataJson),
